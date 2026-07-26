@@ -39,6 +39,13 @@ function relationIds(prop) {
   return (prop?.relation || []).map((r) => r.id);
 }
 
+// 한국 시간(KST) 기준 날짜 문자열 포맷터
+function fmtDate(d) {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    d.getUTCDate()
+  ).padStart(2, "0")}`;
+}
+
 // 한국 시간(KST) 기준으로 지난주 월요일 ~ 다음주 일요일(21일) 범위를 구한다.
 function getKstRange() {
   const KST_OFFSET = 9 * 60 * 60 * 1000;
@@ -54,12 +61,16 @@ function getKstRange() {
   const end = new Date(thisMonday);
   end.setUTCDate(thisMonday.getUTCDate() + 13);
 
-  const fmt = (d) =>
-    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(
-      d.getUTCDate()
-    ).padStart(2, "0")}`;
+  // 트러블 트렌드용: 최근 6개월(약 182일) 전부터
+  const trendStart = new Date(nowKst);
+  trendStart.setUTCHours(0, 0, 0, 0);
+  trendStart.setUTCDate(trendStart.getUTCDate() - 182);
 
-  return { startStr: fmt(start), endStr: fmt(end) };
+  return {
+    startStr: fmtDate(start),
+    endStr: fmtDate(end),
+    trendStartStr: fmtDate(trendStart),
+  };
 }
 
 module.exports = async (req, res) => {
@@ -72,7 +83,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { startStr, endStr } = getKstRange();
+    const { startStr, endStr, trendStartStr } = getKstRange();
 
     // 1) 제품 목록 -> 축약명 매핑
     const products = await queryAll(PRODUCTS_DB, token);
@@ -83,11 +94,11 @@ module.exports = async (req, res) => {
       productMap[p.id] = abbr || name;
     });
 
-    // 2) 스킨케어 로그 (지난주~다음주)
+    // 2) 스킨케어 로그 — 트러블 트렌드 기간(6개월 전)부터 다음주까지 한 번에 조회
     const logs = await queryAll(LOG_DB, token, {
       filter: {
         and: [
-          { property: "날짜", date: { on_or_after: startStr } },
+          { property: "날짜", date: { on_or_after: trendStartStr } },
           { property: "날짜", date: { on_or_before: endStr } },
         ],
       },
@@ -95,10 +106,13 @@ module.exports = async (req, res) => {
     });
 
     const data = logs
+      .filter((pg) => {
+        const d = pg.properties["날짜"]?.date?.start?.slice(0, 10);
+        return d && d >= startStr && d <= endStr;
+      })
       .map((pg) => {
         const props = pg.properties;
         const date = props["날짜"]?.date?.start;
-        if (!date) return null;
         return {
           date: date.slice(0, 10),
           morning: {
@@ -114,10 +128,37 @@ module.exports = async (req, res) => {
             care: multiSelectNames(props["저녁 관리"]),
           },
         };
-      })
-      .filter(Boolean);
+      });
 
-    res.status(200).json({ range: { startStr, endStr }, data });
+    // 3) 트러블 트렌드 — 아침/저녁 피부상태("부위/증상")에서 증상(슬래시 뒤쪽)만 추출해 날짜별로 합치고 중복 제거
+    function symptomsOf(prop) {
+      return multiSelectNames(prop).map((name) => {
+        const idx = name.indexOf("/");
+        return idx === -1 ? name : name.slice(idx + 1);
+      });
+    }
+    const troubleMap = {};
+    logs.forEach((pg) => {
+      const date = pg.properties["날짜"]?.date?.start?.slice(0, 10);
+      if (!date) return;
+      const symptoms = [
+        ...symptomsOf(pg.properties["아침 피부상태"]),
+        ...symptomsOf(pg.properties["저녁 피부상태"]),
+      ];
+      if (!symptoms.length) return;
+      if (!troubleMap[date]) troubleMap[date] = new Set();
+      symptoms.forEach((s) => troubleMap[date].add(s));
+    });
+    const troubles = Object.entries(troubleMap).map(([date, set]) => ({
+      date,
+      symptoms: Array.from(set),
+    }));
+
+    res.status(200).json({
+      range: { startStr, endStr, trendStartStr },
+      data,
+      troubles,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
