@@ -43,29 +43,9 @@
 
   .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 70px;}
 
-  .masthead{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    flex-wrap:wrap;gap:14px;
-    padding-bottom:18px;margin-bottom:4px;
-    border-bottom:2px solid var(--ink);
-  }
-  .brand{
-    font-family:'Noto Sans KR','DM Sans',sans-serif;font-weight:700;
-    font-size:32px;letter-spacing:-0.01em;
-  }
-  .legend{
-    display:flex;gap:16px;font-size:11px;
-    color:var(--ink-soft);align-items:center;
-  }
-  .legend .mono{font-size:10px;letter-spacing:.03em;}
-  .swatch{display:inline-flex;align-items:center;gap:6px;}
-  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-  .dot.am{background:var(--am-solid);}
-  .dot.pm{background:var(--pm-bg-soft);border:1.5px solid var(--pm-dim);}
-
   .toolbar{
     display:flex;justify-content:space-between;align-items:center;
-    padding:12px 0 16px;flex-wrap:wrap;gap:10px;
+    padding:0 0 16px;flex-wrap:wrap;gap:10px;
   }
   .range{font-size:12px;color:var(--ink-soft);}
   .range .mono{color:var(--ink);}
@@ -92,11 +72,11 @@
   .day{
     background:var(--paper);
     display:flex;flex-direction:column;
-    min-height:190px;cursor:pointer;position:relative;
+    min-height:230px;cursor:pointer;position:relative;
     transition:outline .1s ease;
   }
   .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
-  .day.today{box-shadow:inset 0 0 0 2px var(--am-solid);}
+  .day.today{outline:3px solid var(--am-solid);outline-offset:-3px;z-index:3;}
   .day.empty .half{opacity:.42;}
 
   .date-num{
@@ -136,6 +116,17 @@
   .empty-hint{font-size:10px;color:var(--ink-soft);}
   .pm .empty-hint{color:var(--pm-dim);}
 
+  .memo-line{
+    font-size:9.5px;line-height:1.3;opacity:.65;font-weight:400;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .actives-line{
+    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;
+    color:var(--tag-purple);opacity:.9;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .pm .actives-line{color:#B3A6E0;}
+
   /* modal */
   .modal-backdrop{
     position:fixed;inset:0;background:rgba(20,17,12,.5);
@@ -170,24 +161,15 @@
 
   @media (max-width:640px){
     .wrap{padding:20px 10px 50px;}
-    .brand{font-size:24px;}
-    .day{min-height:160px;}
+    .day{min-height:195px;}
     .products{font-size:9px;}
     .tag{font-size:8px;}
-    .legend{display:none;}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="masthead">
-    <div class="brand">스킨케어 로그</div>
-    <div class="legend">
-      <span class="swatch"><span class="dot am"></span><span class="mono">AM · 앰버</span></span>
-      <span class="swatch"><span class="dot pm"></span><span class="mono">PM · 다크글라스</span></span>
-    </div>
-  </div>
   <div class="toolbar">
     <div class="range mono" id="rangeLabel">—</div>
     <button class="refresh-btn" id="refreshBtn">Refresh</button>
@@ -263,6 +245,7 @@ function dayCellHTML(d, entry){
   const night = entry?.night || {};
   const amProducts = (morning.products||[]).slice(0,2).join(' · ');
   const pmProducts = (night.products||[]).slice(0,2).join(' · ');
+  const pmActives = (night.actives||[]).concat(night.care||[]);
 
   return `
   <div class="day ${isToday?'today':''} ${hasData?'':'empty'}" data-date="${iso}">
@@ -271,12 +254,15 @@ function dayCellHTML(d, entry){
       <div class="half-label">AM</div>
       ${renderTags(morning.skin)}
       ${amProducts ? `<div class="products">${amProducts}</div>` : (hasData?'':'<div class="empty-hint">·</div>')}
+      ${morning.memo ? `<div class="memo-line">${morning.memo}</div>` : ''}
     </div>
     <div class="rule"></div>
     <div class="half pm">
       <div class="half-label">PM</div>
-      ${renderTags((night.skin||[]).concat(night.actives||[]).concat(night.care||[]))}
+      ${renderTags(night.skin)}
       ${pmProducts ? `<div class="products">${pmProducts}</div>` : (hasData?'':'<div class="empty-hint">·</div>')}
+      ${pmActives.length ? `<div class="actives-line">${pmActives.join(' · ')}</div>` : ''}
+      ${night.memo ? `<div class="memo-line">${night.memo}</div>` : ''}
     </div>
   </div>`;
 }
