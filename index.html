@@ -4,171 +4,193 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>스킨케어 로그</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,700;1,9..40,700&family=Noto+Sans+KR:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #FAF7F2;
-    --ink: #2A2622;
-    --ink-soft: #6B655C;
-    --line: #E4DDD3;
-    --am-1: #FFE6C7;
-    --am-2: #F4986B;
-    --am-deep: #C96A3E;
-    --pm-1: #3A3B5C;
-    --pm-2: #17182A;
-    --pm-text: #E8E6F5;
-    --pm-soft: #A7A4C4;
-    --pink: #E7A6B3;
-    --red: #E2867A;
-    --gray: #B9B2A6;
-    --purple: #B79ADB;
-    --card-radius: 14px;
+    --bg: #F6F2E9;
+    --paper: #FFFFFF;
+    --ink: #201C16;
+    --ink-soft: #8A7F70;
+    --line: #E1D8C6;
+
+    --am-bg: #F7E7C6;
+    --am-bg-soft: #FBF1DE;
+    --am-ink: #7A4A0E;
+    --am-solid: #C1791A;
+
+    --pm-bg: #17251D;
+    --pm-bg-soft: #1E2F24;
+    --pm-text: #E7EEE6;
+    --pm-dim: #93A798;
+
+    --tag-pink: #A8465A;
+    --tag-red: #9C4A2E;
+    --tag-gray: #756B5C;
+    --tag-purple: #6C5A9E;
+
+    --radius: 6px;
   }
   *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);}
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
+    font-family:'Noto Sans KR','DM Sans',-apple-system,sans-serif;
+    font-weight:700;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
-  .top{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-bottom:6px;
-    border-bottom:1px solid var(--line);
-    padding-bottom:16px;
-  }
-  .title{
-    font-family:'Fraunces',serif;
-    font-weight:600;
-    font-size:30px;
-    letter-spacing:-0.01em;
-  }
-  .subtitle{font-size:13px;color:var(--ink-soft);margin-top:4px;}
-  .refresh-btn{
-    border:1px solid var(--ink);
-    background:var(--ink);
-    color:var(--bg);
-    font-family:inherit;
-    font-size:13px;
-    font-weight:600;
-    padding:9px 16px;
-    border-radius:999px;
-    cursor:pointer;
-    transition:opacity .15s ease, transform .1s ease;
-  }
-  .refresh-btn:hover{opacity:.85;}
-  .refresh-btn:active{transform:scale(.97);}
-  .refresh-btn:disabled{opacity:.5;cursor:default;}
-  .status{font-size:12px;color:var(--ink-soft);margin:10px 2px 18px;min-height:16px;}
-  .status.error{color:var(--red);}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
 
-  .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;}
-  .weekday{
-    text-align:center;font-size:11px;font-weight:600;letter-spacing:.06em;
-    color:var(--ink-soft);text-transform:uppercase;
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 70px;}
+
+  .masthead{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    flex-wrap:wrap;gap:14px;
+    padding-bottom:18px;margin-bottom:4px;
+    border-bottom:2px solid var(--ink);
   }
-  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;}
+  .brand{
+    font-family:'Noto Sans KR','DM Sans',sans-serif;font-weight:700;
+    font-size:32px;letter-spacing:-0.01em;
+  }
+  .legend{
+    display:flex;gap:16px;font-size:11px;
+    color:var(--ink-soft);align-items:center;
+  }
+  .legend .mono{font-size:10px;letter-spacing:.03em;}
+  .swatch{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .dot.am{background:var(--am-solid);}
+  .dot.pm{background:var(--pm-bg-soft);border:1.5px solid var(--pm-dim);}
+
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 0 16px;flex-wrap:wrap;gap:10px;
+  }
+  .range{font-size:12px;color:var(--ink-soft);}
+  .range .mono{color:var(--ink);}
+  .refresh-btn{
+    border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    letter-spacing:.04em;text-transform:uppercase;
+    padding:7px 14px;border-radius:3px;cursor:pointer;
+    transition:background .12s ease,color .12s ease;
+  }
+  .refresh-btn:hover{background:var(--ink);color:var(--bg);}
+  .refresh-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink);}
+  .status{font-size:11px;color:var(--ink-soft);margin:0 0 14px;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status.error{color:var(--tag-red);}
+
+  .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px;background:var(--line);}
+  .weekday{
+    text-align:center;font-size:10px;font-weight:600;letter-spacing:.1em;
+    color:var(--ink-soft);text-transform:uppercase;padding:6px 0;background:var(--bg);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);margin-bottom:1px;}
 
   .day{
-    border-radius:var(--card-radius);
-    overflow:hidden;
-    border:1px solid var(--line);
-    background:#fff;
-    display:flex;
-    flex-direction:column;
-    min-height:150px;
-    cursor:pointer;
-    transition:box-shadow .15s ease, transform .1s ease;
+    background:var(--paper);
+    display:flex;flex-direction:column;
+    min-height:190px;cursor:pointer;position:relative;
+    transition:outline .1s ease;
   }
-  .day:hover{box-shadow:0 4px 16px rgba(0,0,0,.06);}
-  .day.today{border-color:var(--am-deep);}
-  .day.empty{opacity:.45;}
+  .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
+  .day.today{box-shadow:inset 0 0 0 2px var(--am-solid);}
+  .day.empty .half{opacity:.42;}
 
   .date-num{
-    font-family:'Fraunces',serif;
-    font-size:13px;
-    font-weight:600;
-    padding:6px 9px 2px;
-    color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    padding:5px 7px 3px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;
   }
-  .day.today .date-num{color:var(--am-deep);}
+  .day.today .date-num{color:var(--am-ink);}
 
-  .half{padding:6px 9px 8px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;}
-  .am{background:linear-gradient(180deg,var(--am-1),#fff);}
-  .seam{height:4px;background:linear-gradient(90deg,var(--am-2),var(--pm-1));}
-  .pm{background:linear-gradient(180deg,var(--pm-1),var(--pm-2));color:var(--pm-text);}
+  .half{padding:4px 7px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;}
+  .am{background:var(--am-bg-soft);}
+  .pm{background:var(--pm-bg);color:var(--pm-text);}
+  .rule{height:1px;background:var(--ink);opacity:.15;position:relative;}
+  .rule::before{
+    content:'';position:absolute;left:6px;top:-2px;width:4px;height:4px;
+    border-radius:50%;background:var(--ink);opacity:.5;
+  }
 
-  .half-label{font-size:9px;font-weight:700;letter-spacing:.08em;opacity:.55;text-transform:uppercase;}
+  .half-label{
+    font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;
+    letter-spacing:.1em;opacity:.5;text-transform:uppercase;
+  }
   .tags{display:flex;flex-wrap:wrap;gap:3px;}
   .tag{
-    font-size:10px;padding:1px 6px;border-radius:999px;font-weight:600;
-    background:rgba(0,0,0,.06);
+    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;
+    padding:1px 4px;border:1px solid currentColor;border-radius:2px;
+    color:var(--tag-gray);
   }
-  .tag.pink{background:color-mix(in srgb, var(--pink) 35%, white);color:#8a3d4a;}
-  .tag.red{background:color-mix(in srgb, var(--red) 35%, white);color:#8a3226;}
-  .tag.gray{background:color-mix(in srgb, var(--gray) 40%, white);color:#5c564a;}
-  .pm .tag{background:rgba(255,255,255,.14);color:var(--pm-text);}
-  .pm .tag.purple{background:color-mix(in srgb, var(--purple) 45%, transparent);}
+  .tag.pink{color:var(--tag-pink);}
+  .tag.red{color:var(--tag-red);}
+  .tag.gray{color:var(--tag-gray);}
+  .pm .tag{color:var(--pm-dim);border-color:var(--pm-dim);}
+  .pm .tag.purple{color:#B3A6E0;border-color:#B3A6E0;}
 
-  .products{font-size:11px;line-height:1.5;opacity:.9;}
-  .memo{font-size:10.5px;line-height:1.4;opacity:.75;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-
-  .empty-hint{font-size:10px;opacity:.4;padding:2px 0;}
+  .products{font-size:10.5px;line-height:1.45;color:var(--ink);}
+  .pm .products{color:var(--pm-text);}
+  .empty-hint{font-size:10px;color:var(--ink-soft);}
+  .pm .empty-hint{color:var(--pm-dim);}
 
   /* modal */
   .modal-backdrop{
-    position:fixed;inset:0;background:rgba(20,18,15,.45);
+    position:fixed;inset:0;background:rgba(20,17,12,.5);
     display:none;align-items:center;justify-content:center;padding:20px;z-index:50;
   }
   .modal-backdrop.open{display:flex;}
   .modal{
-    background:#fff;border-radius:18px;max-width:420px;width:100%;
-    max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);
+    background:var(--paper);border-radius:4px;max-width:420px;width:100%;
+    max-height:82vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    border:1px solid var(--line);
   }
   .modal-head{
-    font-family:'Fraunces',serif;font-size:20px;font-weight:600;
-    padding:20px 22px 4px;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;border-bottom:2px solid var(--ink);
   }
-  .modal-sub{padding:0 22px 14px;font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line);}
-  .modal-section{padding:16px 22px;border-bottom:1px solid var(--line);}
+  .modal-date{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:19px;}
+  .modal-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);}
+  .close-x{background:none;border:none;font-size:16px;cursor:pointer;color:var(--ink-soft);}
+  .modal-section{padding:16px 20px;border-bottom:1px solid var(--line);}
   .modal-section:last-child{border-bottom:none;}
-  .modal-section.pm{background:linear-gradient(180deg,var(--pm-1),var(--pm-2));color:var(--pm-text);}
-  .modal-section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:8px;}
-  .modal-row{font-size:13px;margin-bottom:6px;line-height:1.5;}
-  .modal-row b{font-weight:600;opacity:.7;font-size:11px;display:block;margin-bottom:2px;}
-  .close-x{
-    position:sticky;top:0;float:right;margin:14px 14px 0 0;
-    background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-soft);
+  .modal-section.pm{background:var(--pm-bg);color:var(--pm-text);}
+  .modal-section-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-bottom:10px;
+  }
+  .modal-row{font-size:13px;margin-bottom:8px;line-height:1.5;}
+  .modal-row b{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;opacity:.55;
+    font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+    display:block;margin-bottom:3px;
   }
 
   @media (max-width:640px){
-    .wrap{padding:18px 10px 40px;}
-    .title{font-size:24px;}
-    .week, .weekday-row{gap:5px;}
-    .day{min-height:120px;}
-    .products, .memo{font-size:9.5px;}
+    .wrap{padding:20px 10px 50px;}
+    .brand{font-size:24px;}
+    .day{min-height:160px;}
+    .products{font-size:9px;}
+    .tag{font-size:8px;}
+    .legend{display:none;}
   }
-  @media (prefers-reduced-motion: reduce){
-    *{transition:none !important;}
-  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div>
-      <div class="title">스킨케어 로그</div>
-      <div class="subtitle" id="rangeLabel">지난주 · 이번주 · 다음주</div>
+  <div class="masthead">
+    <div class="brand">스킨케어 로그</div>
+    <div class="legend">
+      <span class="swatch"><span class="dot am"></span><span class="mono">AM · 앰버</span></span>
+      <span class="swatch"><span class="dot pm"></span><span class="mono">PM · 다크글라스</span></span>
     </div>
-    <button class="refresh-btn" id="refreshBtn">새로고침</button>
+  </div>
+  <div class="toolbar">
+    <div class="range mono" id="rangeLabel">—</div>
+    <button class="refresh-btn" id="refreshBtn">Refresh</button>
   </div>
   <div class="status" id="status"></div>
   <div class="weekday-row" id="weekdayRow"></div>
@@ -180,16 +202,14 @@
 </div>
 
 <script>
-const DS_LOG = "3420494c-783c-80dd-bc26-000b685444d4";
-const DS_PRODUCTS = "3420494c-783c-8057-8152-000b8ace496d";
 const WEEKDAYS = ["일","월","화","수","목","금","토"];
 
 function pad(n){ return String(n).padStart(2,"0"); }
 function toISODate(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 
 function getMondayOfWeek(d){
-  const day = d.getDay(); // 0 Sun .. 6 Sat
-  const diff = (day===0? -6 : 1) - day; // shift to Monday
+  const day = d.getDay();
+  const diff = (day===0? -6 : 1) - day;
   const monday = new Date(d);
   monday.setDate(d.getDate()+diff);
   monday.setHours(0,0,0,0);
@@ -199,8 +219,8 @@ function getMondayOfWeek(d){
 function buildRange(){
   const today = new Date();
   const thisMonday = getMondayOfWeek(today);
-  const start = new Date(thisMonday); start.setDate(thisMonday.getDate()-7); // last week Monday
-  const end = new Date(thisMonday); end.setDate(thisMonday.getDate()+13); // next week Sunday
+  const start = new Date(thisMonday); start.setDate(thisMonday.getDate()-7);
+  const end = new Date(thisMonday); end.setDate(thisMonday.getDate()+13);
   const days = [];
   for(let i=0;i<21;i++){
     const d = new Date(start); d.setDate(start.getDate()+i);
@@ -241,22 +261,22 @@ function dayCellHTML(d, entry){
   const hasData = !!entry;
   const morning = entry?.morning || {};
   const night = entry?.night || {};
-  const amProducts = (morning.products||[]).slice(0,2).join(', ');
-  const pmProducts = (night.products||[]).slice(0,2).join(', ');
+  const amProducts = (morning.products||[]).slice(0,2).join(' · ');
+  const pmProducts = (night.products||[]).slice(0,2).join(' · ');
 
   return `
   <div class="day ${isToday?'today':''} ${hasData?'':'empty'}" data-date="${iso}">
-    <div class="date-num">${d.getDate()}</div>
+    <div class="date-num"><span>${d.getDate()}</span></div>
     <div class="half am">
       <div class="half-label">AM</div>
       ${renderTags(morning.skin)}
-      ${amProducts ? `<div class="products">${amProducts}</div>` : (hasData?'':'<div class="empty-hint">—</div>')}
+      ${amProducts ? `<div class="products">${amProducts}</div>` : (hasData?'':'<div class="empty-hint">·</div>')}
     </div>
-    <div class="seam"></div>
+    <div class="rule"></div>
     <div class="half pm">
       <div class="half-label">PM</div>
       ${renderTags((night.skin||[]).concat(night.actives||[]).concat(night.care||[]))}
-      ${pmProducts ? `<div class="products">${pmProducts}</div>` : (hasData?'':'<div class="empty-hint">—</div>')}
+      ${pmProducts ? `<div class="products">${pmProducts}</div>` : (hasData?'':'<div class="empty-hint">·</div>')}
     </div>
   </div>`;
 }
@@ -272,7 +292,7 @@ function renderCalendar(){
   cal.innerHTML = html;
 
   document.getElementById('rangeLabel').textContent =
-    `${toISODate(days[0])} ~ ${toISODate(days[20])}`;
+    `${toISODate(days[0])} — ${toISODate(days[20])}`;
 
   cal.querySelectorAll('.day').forEach(el=>{
     el.addEventListener('click', ()=>{
@@ -287,17 +307,21 @@ function openModal(iso, entry){
   const morning = entry?.morning || {};
   const night = entry?.night || {};
   modal.innerHTML = `
-    <button class="close-x" id="closeX">✕</button>
-    <div class="modal-head">${iso}</div>
-    <div class="modal-sub">${entry ? '기록 있음' : '기록 없음'}</div>
+    <div class="modal-head">
+      <div>
+        <div class="modal-date">${iso}</div>
+        <div class="modal-tag">${entry ? 'RECORDED' : 'NO RECORD'}</div>
+      </div>
+      <button class="close-x" id="closeX">✕</button>
+    </div>
     <div class="modal-section">
-      <div class="modal-section-title">아침</div>
+      <div class="modal-section-title">Morning</div>
       <div class="modal-row"><b>피부 상태</b>${(morning.skin||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>사용 제품</b>${(morning.products||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>메모</b>${morning.memo || '—'}</div>
     </div>
     <div class="modal-section pm">
-      <div class="modal-section-title">저녁</div>
+      <div class="modal-section-title">Night</div>
       <div class="modal-row"><b>피부 상태</b>${(night.skin||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>사용 제품</b>${(night.products||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>액티브 / 관리</b>${(night.actives||[]).concat(night.care||[]).join(', ') || '—'}</div>
@@ -315,16 +339,16 @@ document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
 async function fetchData(){
   const btn = document.getElementById('refreshBtn');
   btn.disabled = true;
-  setStatus('노션에서 불러오는 중…');
+  setStatus('불러오는 중…');
   try{
-    const r = await fetch('/api/skincare');
+    const r = await fetch('https://skincare-widget-chi.vercel.app/api/skincare');
     const json = await r.json();
     if(!r.ok) throw new Error(json.error || ('HTTP ' + r.status));
     const map = {};
     (json.data||[]).forEach(e => { if(e && e.date) map[e.date] = e; });
     STATE.data = map;
     renderCalendar();
-    setStatus(`불러옴 · ${new Date().toLocaleTimeString('ko-KR')} 기준`);
+    setStatus(`SYNCED ${new Date().toLocaleTimeString('ko-KR')}`);
   }catch(err){
     console.error(err);
     setStatus('불러오기 실패: ' + (err.message||''), true);
