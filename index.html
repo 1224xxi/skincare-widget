@@ -9,26 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,700;1,9..40,700&family=Noto+Sans+KR:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #F6F2E9;
+    --bg: #FFFFFF;
     --paper: #FFFFFF;
-    --ink: #201C16;
-    --ink-soft: #8A7F70;
-    --line: #E1D8C6;
+    --ink: #111111;
+    --ink-soft: #8A8A8A;
+    --line: #E7E7E7;
 
-    --am-bg: #F7E7C6;
-    --am-bg-soft: #FBF1DE;
-    --am-ink: #7A4A0E;
-    --am-solid: #C1791A;
+    --date-bg: #EFEFEF;
+    --today-accent: #D98E97;
 
-    --pm-bg: #17251D;
-    --pm-bg-soft: #1E2F24;
-    --pm-text: #E7EEE6;
-    --pm-dim: #93A798;
-
-    --tag-pink: #A8465A;
-    --tag-red: #9C4A2E;
-    --tag-gray: #756B5C;
-    --tag-purple: #6C5A9E;
+    --tag-pink: #C13B5A;
+    --tag-red: #C1451F;
+    --tag-gray: #A67C1E;
+    --tag-purple: #7C5CBF;
 
     --radius: 6px;
   }
@@ -76,19 +69,19 @@
     transition:outline .1s ease;
   }
   .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
-  .day.today{outline:3px solid var(--am-solid);outline-offset:-3px;z-index:3;}
+  .day.today{outline:3px solid var(--today-accent);outline-offset:-3px;z-index:3;}
   .day.empty .half{opacity:.42;}
 
   .date-num{
     font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
-    padding:5px 7px 3px;color:var(--ink-soft);
+    padding:5px 7px 3px;color:var(--ink-soft);background:var(--date-bg);
     display:flex;justify-content:space-between;
   }
-  .day.today .date-num{color:var(--am-ink);}
+  .day.today .date-num{color:var(--today-accent);}
 
   .half{padding:4px 7px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden;}
-  .am{background:var(--am-bg-soft);}
-  .pm{background:var(--pm-bg);color:var(--pm-text);}
+  .am{background:var(--paper);}
+  .pm{background:var(--paper);color:var(--ink);}
   .rule{height:1px;background:var(--ink);opacity:.15;position:relative;}
   .rule::before{
     content:'';position:absolute;left:6px;top:-2px;width:4px;height:4px;
@@ -101,31 +94,26 @@
   }
   .tags{display:flex;flex-wrap:wrap;gap:3px;}
   .tag{
-    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;
+    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;
     padding:1px 4px;border:1px solid currentColor;border-radius:2px;
     color:var(--tag-gray);
   }
   .tag.pink{color:var(--tag-pink);}
   .tag.red{color:var(--tag-red);}
   .tag.gray{color:var(--tag-gray);}
-  .pm .tag{color:var(--pm-dim);border-color:var(--pm-dim);}
-  .pm .tag.purple{color:#B3A6E0;border-color:#B3A6E0;}
 
   .products{font-size:10.5px;line-height:1.45;color:var(--ink);}
-  .pm .products{color:var(--pm-text);}
   .empty-hint{font-size:10px;color:var(--ink-soft);}
-  .pm .empty-hint{color:var(--pm-dim);}
 
   .memo-line{
-    font-size:9.5px;line-height:1.3;opacity:.65;font-weight:400;
+    font-size:9.5px;line-height:1.3;opacity:.6;font-weight:400;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .actives-line{
-    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;
-    color:var(--tag-purple);opacity:.9;
+    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;
+    color:var(--tag-purple);opacity:1;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .pm .actives-line{color:#B3A6E0;}
 
   /* modal */
   .modal-backdrop{
@@ -147,7 +135,7 @@
   .close-x{background:none;border:none;font-size:16px;cursor:pointer;color:var(--ink-soft);}
   .modal-section{padding:16px 20px;border-bottom:1px solid var(--line);}
   .modal-section:last-child{border-bottom:none;}
-  .modal-section.pm{background:var(--pm-bg);color:var(--pm-text);}
+  .modal-section.pm{background:var(--paper);color:var(--ink);border-top:2px solid var(--line);}
   .modal-section-title{
     font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
     letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-bottom:10px;
@@ -158,6 +146,8 @@
     font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
     display:block;margin-bottom:3px;
   }
+  .modal-row.accent-skin{color:var(--tag-pink);font-weight:700;}
+  .modal-row.accent-active{color:var(--tag-purple);font-weight:700;}
 
   @media (max-width:640px){
     .wrap{padding:20px 10px 50px;}
@@ -302,15 +292,15 @@ function openModal(iso, entry){
     </div>
     <div class="modal-section">
       <div class="modal-section-title">Morning</div>
-      <div class="modal-row"><b>피부 상태</b>${(morning.skin||[]).join(', ') || '—'}</div>
+      <div class="modal-row accent-skin"><b>피부 상태</b>${(morning.skin||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>사용 제품</b>${(morning.products||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>메모</b>${morning.memo || '—'}</div>
     </div>
     <div class="modal-section pm">
       <div class="modal-section-title">Night</div>
-      <div class="modal-row"><b>피부 상태</b>${(night.skin||[]).join(', ') || '—'}</div>
+      <div class="modal-row accent-skin"><b>피부 상태</b>${(night.skin||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>사용 제품</b>${(night.products||[]).join(', ') || '—'}</div>
-      <div class="modal-row"><b>액티브 / 관리</b>${(night.actives||[]).concat(night.care||[]).join(', ') || '—'}</div>
+      <div class="modal-row accent-active"><b>액티브 / 관리</b>${(night.actives||[]).concat(night.care||[]).join(', ') || '—'}</div>
       <div class="modal-row"><b>메모</b>${night.memo || '—'}</div>
     </div>
   `;
