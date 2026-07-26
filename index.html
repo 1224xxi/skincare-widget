@@ -34,11 +34,11 @@
   }
   .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
 
-  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 70px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:14px 20px 24px;}
 
   .toolbar{
     display:flex;justify-content:space-between;align-items:center;
-    padding:0 0 16px;flex-wrap:wrap;gap:10px;
+    padding:0 0 8px;flex-wrap:wrap;gap:10px;
   }
   .range{font-size:12px;color:var(--ink-soft);}
   .range .mono{color:var(--ink);}
@@ -51,7 +51,7 @@
   }
   .refresh-btn:hover{background:var(--ink);color:var(--bg);}
   .refresh-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink);}
-  .status{font-size:11px;color:var(--ink-soft);margin:0 0 14px;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status{font-size:11px;color:var(--ink-soft);margin:0 0 6px;min-height:14px;font-family:'IBM Plex Mono',monospace;}
   .status.error{color:var(--tag-red);}
 
   .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px;background:var(--line);}
@@ -150,24 +150,24 @@
   .modal-row.accent-active{color:var(--tag-purple);font-weight:700;}
 
   @media (max-width:640px){
-    .wrap{padding:20px 10px 50px;}
+    .wrap{padding:10px 10px 20px;}
     .day{height:185px;}
     .products{font-size:9px;}
     .tag{font-size:8px;}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 
-  .trend-section{margin-top:30px;}
+  .trend-section{margin-top:16px;}
   .trend-head{
     display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:10px;flex-wrap:wrap;gap:8px;
+    margin-bottom:6px;flex-wrap:wrap;gap:8px;
   }
   .trend-title{font-size:12px;font-weight:700;letter-spacing:.01em;}
   .trend-legend{display:flex;gap:14px;font-size:10px;color:var(--ink-soft);flex-wrap:wrap;}
   .trend-swatch{display:inline-flex;align-items:center;gap:5px;}
   .dot-mark{width:7px;height:7px;border-radius:50%;display:inline-block;}
 
-  .trend-scroll{overflow-x:auto;border:1px solid var(--line);padding:10px 10px 12px;}
+  .trend-scroll{overflow-x:auto;border:1px solid var(--line);padding:8px 8px 8px;}
   .trend-track{position:relative;}
   .trend-months{position:relative;height:14px;margin-bottom:4px;}
   .trend-month-label{
@@ -175,7 +175,7 @@
     font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);
   }
   .trend-row{position:relative;height:18px;border-top:1px solid var(--line);}
-  .trend-dot{position:absolute;top:5px;width:6px;height:6px;border-radius:50%;transform:translateX(-50%);}
+  .trend-dot{position:absolute;top:6px;width:4px;height:4px;border-radius:50%;transform:translateX(-50%);}
   .trend-month-line{
     position:absolute;top:18px;bottom:0;width:1px;
     background:var(--ink);opacity:.18;pointer-events:none;
@@ -198,7 +198,7 @@
 
   <div class="trend-section">
     <div class="trend-head">
-      <div class="trend-title">트러블 트렌드 · 최근 6개월</div>
+      <div class="trend-title">트러블 트렌드 · 최근 4개월</div>
       <div class="trend-legend" id="trendLegend"></div>
     </div>
     <div class="trend-scroll">
@@ -354,8 +354,8 @@ document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
   if(e.target.id==='modalBackdrop') closeModal();
 });
 
-const TREND_COL = 6; // px per day
-const TREND_DAYS_BACK = 182;
+const TREND_COL = 4; // px per day
+const TREND_DAYS_BACK = 122; // 약 4개월
 
 // 증상(피부상태 속성의 "/" 뒤쪽)별 표시 색상. 필요하면 여기 색상 코드만 바꾸면 됨.
 // 지정 안 된 증상은 트렌드에 표시하지 않음.
