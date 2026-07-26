@@ -72,7 +72,7 @@
   .day{
     background:var(--paper);
     display:flex;flex-direction:column;
-    min-height:230px;cursor:pointer;position:relative;
+    height:210px;cursor:pointer;position:relative;overflow:hidden;
     transition:outline .1s ease;
   }
   .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
@@ -86,7 +86,7 @@
   }
   .day.today .date-num{color:var(--am-ink);}
 
-  .half{padding:4px 7px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;}
+  .half{padding:4px 7px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden;}
   .am{background:var(--am-bg-soft);}
   .pm{background:var(--pm-bg);color:var(--pm-text);}
   .rule{height:1px;background:var(--ink);opacity:.15;position:relative;}
@@ -161,7 +161,7 @@
 
   @media (max-width:640px){
     .wrap{padding:20px 10px 50px;}
-    .day{min-height:195px;}
+    .day{height:185px;}
     .products{font-size:9px;}
     .tag{font-size:8px;}
   }
