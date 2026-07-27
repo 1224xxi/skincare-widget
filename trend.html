@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>트러블 트렌드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,700;1,9..40,700&family=Noto+Sans+KR:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --ink-soft: #8A8A8A;
+    --line: #E7E7E7;
+    --today-accent: #D98E97;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:'Noto Sans KR','DM Sans',-apple-system,sans-serif;
+    font-weight:700;-webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 14px;}
+
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 0 8px;flex-wrap:wrap;gap:10px;
+  }
+  .refresh-btn{
+    border:1.5px solid var(--ink);background:#fff;color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    letter-spacing:.04em;text-transform:uppercase;
+    padding:7px 14px;border-radius:3px;cursor:pointer;
+    transition:background .12s ease,color .12s ease;
+  }
+  .refresh-btn:hover{background:var(--ink);color:#fff;}
+  .refresh-btn:disabled{opacity:.4;cursor:default;}
+  .status{font-size:11px;color:var(--ink-soft);margin:0 0 6px;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status.error{color:#C1451F;}
+
+  .trend-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:6px;flex-wrap:wrap;gap:8px;
+  }
+  .trend-title{font-size:12px;font-weight:700;letter-spacing:.01em;}
+  .trend-legend{display:flex;gap:14px;font-size:10px;color:var(--ink-soft);flex-wrap:wrap;}
+  .trend-swatch{display:inline-flex;align-items:center;gap:5px;}
+  .dot-mark{width:7px;height:7px;border-radius:50%;display:inline-block;}
+
+  .trend-box{border:1px solid var(--line);padding:8px 10px 10px;}
+  .trend-track{position:relative;width:100%;}
+  .trend-months{position:relative;height:14px;margin-bottom:4px;}
+  .trend-month-label{
+    position:absolute;top:0;white-space:nowrap;
+    font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);
+    transform:translateX(-2px);
+  }
+  .trend-row{position:relative;height:18px;border-top:1px solid var(--line);}
+  .trend-dot{position:absolute;top:6px;width:6px;height:6px;border-radius:50%;transform:translateX(-50%);}
+  .trend-month-line{
+    position:absolute;top:18px;bottom:0;width:1px;
+    background:var(--ink);opacity:.18;pointer-events:none;
+  }
+  .trend-today-line{
+    position:absolute;top:18px;bottom:0;width:1px;
+    background:var(--today-accent);opacity:.7;pointer-events:none;
+  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <div class="status" id="status" style="margin:0;">—</div>
+    <button class="refresh-btn" id="refreshBtn">Refresh</button>
+  </div>
+  <div class="trend-head">
+    <div class="trend-title">트러블 트렌드 · 최근 4개월</div>
+    <div class="trend-legend" id="trendLegend"></div>
+  </div>
+  <div class="trend-box">
+    <div class="trend-track" id="trendTrack">
+      <div class="trend-months" id="trendMonths"></div>
+      <div id="trendRows"></div>
+      <div id="trendTodayLine"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pad(n){ return String(n).padStart(2,"0"); }
+function toISODate(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+
+function setStatus(msg, isError){
+  const el = document.getElementById('status');
+  el.textContent = msg || '';
+  el.className = 'status' + (isError ? ' error' : '');
+}
+
+const TREND_DAYS_BACK = 122; // 약 4개월
+
+// 증상(피부상태 속성의 "/" 뒤쪽)별 표시 색상. 필요하면 여기 색상 코드만 바꾸면 됨.
+// 지정 안 된 증상은 트렌드에 표시하지 않음.
+const SYMPTOM_COLORS = {
+  '염증성': '#E0392B',   // 빨강
+  '화농성': '#E08A2B',   // 주황
+  '좁쌀': '#F2C230',     // 노랑
+  '각질': '#2F6FE0',     // 파랑
+  '모공-피지': '#63C7E8', // 하늘
+  '흔적만': '#3FBFA0',   // 민트
+  '좋음': '#1E8449',     // 초록(딥그린)
+};
+const SYMPTOM_ORDER = Object.keys(SYMPTOM_COLORS);
+// 같은 증상으로 취급할 동의어 -> 대표 이름
+const SYMPTOM_ALIASES = {
+  '좁쌀-피지': '좁쌀',
+  '흔적': '흔적만',
+};
+function normalizeSymptom(s){ return SYMPTOM_ALIASES[s] || s; }
+
+function renderTrend(troubles){
+  const troubleMap = {};
+  (troubles||[]).forEach(t => {
+    if(t && t.date) troubleMap[t.date] = (t.symptoms || []).map(normalizeSymptom);
+  });
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(today); start.setDate(today.getDate() - TREND_DAYS_BACK);
+  const days = [];
+  for(let d = new Date(start); d <= today; d.setDate(d.getDate()+1)){ days.push(new Date(d)); }
+
+  const pctFor = (i) => (i / (days.length - 1)) * 100;
+
+  let monthsHTML = '', monthLinesHTML = '', todayLineHTML = '';
+  const rowsHTML = {};
+  SYMPTOM_ORDER.forEach(s => rowsHTML[s] = '');
+  const todayISO = toISODate(today);
+
+  days.forEach((d, i) => {
+    const left = pctFor(i);
+    if(d.getDate() === 1){
+      monthsHTML += `<span class="trend-month-label" style="left:${left}%">${d.getMonth()+1}월</span>`;
+      monthLinesHTML += `<span class="trend-month-line" style="left:${left}%"></span>`;
+    }
+    const iso = toISODate(d);
+    const symptoms = troubleMap[iso] || [];
+    SYMPTOM_ORDER.forEach(s => {
+      if(symptoms.includes(s)){
+        rowsHTML[s] += `<span class="trend-dot" style="left:${left}%;background:${SYMPTOM_COLORS[s]}"></span>`;
+      }
+    });
+    if(iso === todayISO){
+      todayLineHTML += `<span class="trend-today-line" style="left:${left}%"></span>`;
+    }
+  });
+
+  document.getElementById('trendMonths').innerHTML = monthsHTML;
+  document.getElementById('trendTodayLine').innerHTML = monthLinesHTML + todayLineHTML;
+
+  const rowsContainer = document.getElementById('trendRows');
+  rowsContainer.innerHTML = SYMPTOM_ORDER.map(s =>
+    `<div class="trend-row">${rowsHTML[s]}</div>`
+  ).join('');
+
+  document.getElementById('trendLegend').innerHTML = SYMPTOM_ORDER.map(s =>
+    `<span class="trend-swatch"><span class="dot-mark" style="background:${SYMPTOM_COLORS[s]}"></span>${s}</span>`
+  ).join('');
+}
+
+async function fetchData(){
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  setStatus('불러오는 중…');
+  try{
+    const r = await fetch('https://skincare-widget-chi.vercel.app/api/skincare');
+    const json = await r.json();
+    if(!r.ok) throw new Error(json.error || ('HTTP ' + r.status));
+    renderTrend(json.troubles);
+    setStatus(`SYNCED ${new Date().toLocaleTimeString('ko-KR')}`);
+  }catch(err){
+    console.error(err);
+    setStatus('불러오기 실패: ' + (err.message||''), true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', fetchData);
+fetchData();
+</script>
+</body>
+</html>
