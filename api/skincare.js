@@ -154,10 +154,37 @@ module.exports = async (req, res) => {
       symptoms: Array.from(set),
     }));
 
+    // 4) 스트릭 — 페이지가 생성된 날짜 집합 (하루 전체 기준, KST)
+    const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+    const streakSet = new Set();
+    logs.forEach((pg) => {
+      if (!pg.created_time) return;
+      const createdKst = new Date(new Date(pg.created_time).getTime() + KST_OFFSET_MS);
+      streakSet.add(fmtDate(createdKst));
+    });
+    const streakDates = Array.from(streakSet).sort();
+
+    // 오늘(또는 오늘이 아직이면 어제)부터 거꾸로 연속 기록일 계산
+    let currentStreak = 0;
+    {
+      const todayKst = new Date(Date.now() + KST_OFFSET_MS);
+      todayKst.setUTCHours(0, 0, 0, 0);
+      const cursor = new Date(todayKst);
+      if (!streakSet.has(fmtDate(cursor))) {
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+      }
+      while (streakSet.has(fmtDate(cursor))) {
+        currentStreak++;
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+      }
+    }
+
     res.status(200).json({
       range: { startStr, endStr, trendStartStr },
       data,
       troubles,
+      streakDates,
+      currentStreak,
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
