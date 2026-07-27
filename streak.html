@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기록 스트릭</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,700;1,9..40,700&family=Noto+Sans+KR:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFFFFF;
+    --ink: #111111;
+    --ink-soft: #8A8A8A;
+    --line: #E7E7E7;
+    --today-accent: #D98E97;
+    --check: #1E8449;
+    --cell-empty: #F0F0F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:'Noto Sans KR','DM Sans',-apple-system,sans-serif;
+    font-weight:700;-webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+
+  .wrap{max-width:520px;margin:0 auto;padding:8px 20px 14px;}
+
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 0 8px;flex-wrap:wrap;gap:10px;
+  }
+  .refresh-btn{
+    border:1.5px solid var(--ink);background:#fff;color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    letter-spacing:.04em;text-transform:uppercase;
+    padding:7px 14px;border-radius:3px;cursor:pointer;
+    transition:background .12s ease,color .12s ease;
+  }
+  .refresh-btn:hover{background:var(--ink);color:#fff;}
+  .refresh-btn:disabled{opacity:.4;cursor:default;}
+  .status{font-size:11px;color:var(--ink-soft);margin:0;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status.error{color:#C1451F;}
+
+  .streak-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:8px;flex-wrap:wrap;gap:8px;
+  }
+  .streak-title{font-size:12px;font-weight:700;letter-spacing:.01em;}
+  .streak-count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--check);}
+  .streak-count b{font-size:16px;}
+
+  .hab-weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+  .hab-weekday{
+    text-align:center;font-size:9px;font-weight:600;letter-spacing:.05em;
+    color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;
+  }
+  .hab-grid{display:flex;flex-direction:column;gap:5px;}
+  .hab-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .hab-cell{
+    aspect-ratio:1;border-radius:5px;background:var(--cell-empty);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);
+  }
+  .hab-cell.checked{background:var(--check);color:#fff;}
+  .hab-cell.out{background:transparent;}
+  .hab-cell.today{outline:2px solid var(--today-accent);outline-offset:-2px;}
+
+  .streak-note{font-size:10px;color:var(--ink-soft);margin-top:8px;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <div class="status" id="status">—</div>
+    <button class="refresh-btn" id="refreshBtn">Refresh</button>
+  </div>
+  <div class="streak-head">
+    <div class="streak-title">기록 스트릭 · 최근 한 달</div>
+    <div class="streak-count mono" id="streakCount">연속 <b>—</b>일</div>
+  </div>
+  <div class="hab-weekday-row" id="habWeekdayRow"></div>
+  <div class="hab-grid" id="habGrid"></div>
+  <div class="streak-note">스킨케어 로그 페이지가 만들어진 날에 체크돼요.</div>
+</div>
+
+<script>
+const WEEKDAYS = ["월","화","수","목","금","토","일"];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function toISODate(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+
+function setStatus(msg, isError){
+  const el = document.getElementById('status');
+  el.textContent = msg || '';
+  el.className = 'status' + (isError ? ' error' : '');
+}
+
+function renderWeekdayHeader(){
+  document.getElementById('habWeekdayRow').innerHTML =
+    WEEKDAYS.map(w => `<div class="hab-weekday">${w}</div>`).join('');
+}
+
+const DAYS_BACK = 29; // 최근 한 달(오늘 포함 30일)
+
+function buildWeeks(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(today); start.setDate(today.getDate() - DAYS_BACK);
+
+  const startDow = (start.getDay() + 6) % 7;
+  const gridStart = new Date(start); gridStart.setDate(start.getDate() - startDow);
+  const todayDow = (today.getDay() + 6) % 7;
+  const gridEnd = new Date(today); gridEnd.setDate(today.getDate() + (6 - todayDow));
+
+  const weeks = [];
+  let cursor = new Date(gridStart);
+  while(cursor <= gridEnd){
+    const week = [];
+    for(let i=0;i<7;i++){
+      week.push(new Date(cursor));
+      cursor.setDate(cursor.getDate()+1);
+    }
+    weeks.push(week);
+  }
+  return { weeks, rangeStart: start, rangeEnd: today };
+}
+
+function renderStreak(streakDates, currentStreak){
+  const checkedSet = new Set(streakDates || []);
+  const { weeks, rangeStart, rangeEnd } = buildWeeks();
+  const todayISO = toISODate(rangeEnd);
+
+  const gridHTML = weeks.map(week => {
+    const cellsHTML = week.map(d => {
+      const inRange = d >= rangeStart && d <= rangeEnd;
+      if(!inRange){
+        return `<div class="hab-cell out"></div>`;
+      }
+      const iso = toISODate(d);
+      const isChecked = checkedSet.has(iso);
+      const isToday = iso === todayISO;
+      return `<div class="hab-cell ${isChecked?'checked':''} ${isToday?'today':''}">${d.getDate()}</div>`;
+    }).join('');
+    return `<div class="hab-week">${cellsHTML}</div>`;
+  }).join('');
+
+  document.getElementById('habGrid').innerHTML = gridHTML;
+  document.getElementById('streakCount').innerHTML = `연속 <b>${currentStreak ?? 0}</b>일`;
+}
+
+async function fetchData(){
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  setStatus('불러오는 중…');
+  try{
+    const r = await fetch('https://skincare-widget-chi.vercel.app/api/skincare');
+    const json = await r.json();
+    if(!r.ok) throw new Error(json.error || ('HTTP ' + r.status));
+    renderStreak(json.streakDates, json.currentStreak);
+    setStatus(`SYNCED ${new Date().toLocaleTimeString('ko-KR')}`);
+  }catch(err){
+    console.error(err);
+    setStatus('불러오기 실패: ' + (err.message||''), true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+renderWeekdayHeader();
+document.getElementById('refreshBtn').addEventListener('click', fetchData);
+fetchData();
+</script>
+</body>
+</html>
