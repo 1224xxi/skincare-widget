@@ -34,7 +34,7 @@
   }
   .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
 
-  .wrap{max-width:1080px;margin:0 auto;padding:14px 20px 24px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 14px;}
 
   .toolbar{
     display:flex;justify-content:space-between;align-items:center;
@@ -150,40 +150,12 @@
   .modal-row.accent-active{color:var(--tag-purple);font-weight:700;}
 
   @media (max-width:640px){
-    .wrap{padding:10px 10px 20px;}
+    .wrap{padding:6px 10px 12px;}
     .day{height:185px;}
     .products{font-size:9px;}
     .tag{font-size:8px;}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
-
-  .trend-section{margin-top:16px;}
-  .trend-head{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:6px;flex-wrap:wrap;gap:8px;
-  }
-  .trend-title{font-size:12px;font-weight:700;letter-spacing:.01em;}
-  .trend-legend{display:flex;gap:14px;font-size:10px;color:var(--ink-soft);flex-wrap:wrap;}
-  .trend-swatch{display:inline-flex;align-items:center;gap:5px;}
-  .dot-mark{width:7px;height:7px;border-radius:50%;display:inline-block;}
-
-  .trend-scroll{overflow-x:auto;border:1px solid var(--line);padding:8px 8px 8px;}
-  .trend-track{position:relative;}
-  .trend-months{position:relative;height:14px;margin-bottom:4px;}
-  .trend-month-label{
-    position:absolute;top:0;white-space:nowrap;
-    font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);
-  }
-  .trend-row{position:relative;height:18px;border-top:1px solid var(--line);}
-  .trend-dot{position:absolute;top:6px;width:4px;height:4px;border-radius:50%;transform:translateX(-50%);}
-  .trend-month-line{
-    position:absolute;top:18px;bottom:0;width:1px;
-    background:var(--ink);opacity:.18;pointer-events:none;
-  }
-  .trend-today-line{
-    position:absolute;top:18px;bottom:0;width:1px;
-    background:var(--today-accent);opacity:.7;pointer-events:none;
-  }
 </style>
 </head>
 <body>
@@ -195,20 +167,6 @@
   <div class="status" id="status"></div>
   <div class="weekday-row" id="weekdayRow"></div>
   <div id="calendar"></div>
-
-  <div class="trend-section">
-    <div class="trend-head">
-      <div class="trend-title">트러블 트렌드 · 최근 4개월</div>
-      <div class="trend-legend" id="trendLegend"></div>
-    </div>
-    <div class="trend-scroll">
-      <div class="trend-track" id="trendTrack">
-        <div class="trend-months" id="trendMonths"></div>
-        <div id="trendRows"></div>
-        <div id="trendTodayLine"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop">
@@ -354,78 +312,6 @@ document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
   if(e.target.id==='modalBackdrop') closeModal();
 });
 
-const TREND_COL = 4; // px per day
-const TREND_DAYS_BACK = 122; // 약 4개월
-
-// 증상(피부상태 속성의 "/" 뒤쪽)별 표시 색상. 필요하면 여기 색상 코드만 바꾸면 됨.
-// 지정 안 된 증상은 트렌드에 표시하지 않음.
-const SYMPTOM_COLORS = {
-  '염증성': '#E0392B',   // 빨강
-  '화농성': '#E08A2B',   // 주황
-  '좁쌀': '#F2C230',     // 노랑
-  '각질': '#2F6FE0',     // 파랑
-  '모공-피지': '#63C7E8', // 하늘
-  '흔적만': '#3FBFA0',   // 민트
-  '좋음': '#1E8449',     // 초록(딥그린)
-};
-const SYMPTOM_ORDER = Object.keys(SYMPTOM_COLORS);
-// 같은 증상으로 취급할 동의어 -> 대표 이름
-const SYMPTOM_ALIASES = {
-  '좁쌀-피지': '좁쌀',
-  '흔적': '흔적만',
-};
-function normalizeSymptom(s){ return SYMPTOM_ALIASES[s] || s; }
-
-function renderTrend(troubles){
-  const troubleMap = {};
-  (troubles||[]).forEach(t => {
-    if(t && t.date) troubleMap[t.date] = (t.symptoms || []).map(normalizeSymptom);
-  });
-
-  const today = new Date(); today.setHours(0,0,0,0);
-  const start = new Date(today); start.setDate(today.getDate() - TREND_DAYS_BACK);
-  const days = [];
-  for(let d = new Date(start); d <= today; d.setDate(d.getDate()+1)){ days.push(new Date(d)); }
-
-  const track = document.getElementById('trendTrack');
-  track.style.width = (days.length * TREND_COL) + 'px';
-
-  let monthsHTML = '', monthLinesHTML = '', todayLineHTML = '';
-  const rowsHTML = {};
-  SYMPTOM_ORDER.forEach(s => rowsHTML[s] = '');
-  const todayISO = toISODate(today);
-
-  days.forEach((d, i) => {
-    const left = i * TREND_COL;
-    if(d.getDate() === 1){
-      monthsHTML += `<span class="trend-month-label" style="left:${left}px">${d.getMonth()+1}월</span>`;
-      monthLinesHTML += `<span class="trend-month-line" style="left:${left}px"></span>`;
-    }
-    const iso = toISODate(d);
-    const symptoms = troubleMap[iso] || [];
-    SYMPTOM_ORDER.forEach(s => {
-      if(symptoms.includes(s)){
-        rowsHTML[s] += `<span class="trend-dot" style="left:${left}px;background:${SYMPTOM_COLORS[s]}"></span>`;
-      }
-    });
-    if(iso === todayISO){
-      todayLineHTML += `<span class="trend-today-line" style="left:${left}px"></span>`;
-    }
-  });
-
-  document.getElementById('trendMonths').innerHTML = monthsHTML;
-  document.getElementById('trendTodayLine').innerHTML = monthLinesHTML + todayLineHTML;
-
-  const rowsContainer = document.getElementById('trendRows');
-  rowsContainer.innerHTML = SYMPTOM_ORDER.map(s =>
-    `<div class="trend-row">${rowsHTML[s]}</div>`
-  ).join('');
-
-  document.getElementById('trendLegend').innerHTML = SYMPTOM_ORDER.map(s =>
-    `<span class="trend-swatch"><span class="dot-mark" style="background:${SYMPTOM_COLORS[s]}"></span>${s}</span>`
-  ).join('');
-}
-
 async function fetchData(){
   const btn = document.getElementById('refreshBtn');
   btn.disabled = true;
@@ -438,7 +324,6 @@ async function fetchData(){
     (json.data||[]).forEach(e => { if(e && e.date) map[e.date] = e; });
     STATE.data = map;
     renderCalendar();
-    renderTrend(json.troubles);
     setStatus(`SYNCED ${new Date().toLocaleTimeString('ko-KR')}`);
   }catch(err){
     console.error(err);
