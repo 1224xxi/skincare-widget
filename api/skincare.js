@@ -105,30 +105,26 @@ module.exports = async (req, res) => {
       sorts: [{ property: "날짜", direction: "ascending" }],
     });
 
-    const data = logs
-      .filter((pg) => {
-        const d = pg.properties["날짜"]?.date?.start?.slice(0, 10);
-        return d && d >= startStr && d <= endStr;
-      })
-      .map((pg) => {
-        const props = pg.properties;
-        const date = props["날짜"]?.date?.start;
-        return {
-          date: date.slice(0, 10),
-          morning: {
-            skin: multiSelectNames(props["아침 피부상태"]),
-            products: relationIds(props["아침"]).map((id) => productMap[id]).filter(Boolean),
-            memo: textVal(props["아침 메모"]),
-          },
-          night: {
-            skin: multiSelectNames(props["저녁 피부상태"]),
-            products: relationIds(props["저녁"]).map((id) => productMap[id]).filter(Boolean),
-            memo: textVal(props["저녁 메모"]) || textVal(props["텍스트"]),
-            actives: multiSelectNames(props["저녁 액티브"]),
-            care: multiSelectNames(props["저녁 관리"]),
-          },
-        };
-      });
+    const data = logs.map((pg) => {
+      const props = pg.properties;
+      const date = props["날짜"]?.date?.start;
+      if (!date) return null;
+      return {
+        date: date.slice(0, 10),
+        morning: {
+          skin: multiSelectNames(props["아침 피부상태"]),
+          products: relationIds(props["아침"]).map((id) => productMap[id]).filter(Boolean),
+          memo: textVal(props["아침 메모"]),
+        },
+        night: {
+          skin: multiSelectNames(props["저녁 피부상태"]),
+          products: relationIds(props["저녁"]).map((id) => productMap[id]).filter(Boolean),
+          memo: textVal(props["저녁 메모"]) || textVal(props["텍스트"]),
+          actives: multiSelectNames(props["저녁 액티브"]),
+          care: multiSelectNames(props["저녁 관리"]),
+        },
+      };
+    }).filter(Boolean);
 
     // 3) 트러블 트렌드 — 아침/저녁 피부상태("부위/증상")에서 증상(슬래시 뒤쪽)만 추출해 날짜별로 합치고 중복 제거
     function symptomsOf(prop) {
