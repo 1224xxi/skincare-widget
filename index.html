@@ -37,11 +37,25 @@
   .wrap{max-width:1080px;margin:0 auto;padding:8px 20px 14px;}
 
   .toolbar{
+    display:flex;justify-content:center;align-items:center;
+    gap:14px;padding:0 0 6px;
+  }
+  .nav-btn{
+    border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;
+    width:30px;height:30px;border-radius:3px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .12s ease,color .12s ease;
+  }
+  .nav-btn:hover{background:var(--ink);color:var(--bg);}
+  .nav-btn:disabled{opacity:.3;cursor:default;background:var(--paper);color:var(--ink);}
+  .range{font-size:12px;color:var(--ink-soft);min-width:150px;text-align:center;}
+  .range .mono{color:var(--ink);}
+
+  .toolbar2{
     display:flex;justify-content:space-between;align-items:center;
     padding:0 0 8px;flex-wrap:wrap;gap:10px;
   }
-  .range{font-size:12px;color:var(--ink-soft);}
-  .range .mono{color:var(--ink);}
   .refresh-btn{
     border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
     font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
@@ -51,21 +65,21 @@
   }
   .refresh-btn:hover{background:var(--ink);color:var(--bg);}
   .refresh-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink);}
-  .status{font-size:11px;color:var(--ink-soft);margin:0 0 6px;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status{font-size:11px;color:var(--ink-soft);margin:0;min-height:14px;font-family:'IBM Plex Mono',monospace;}
   .status.error{color:var(--tag-red);}
 
-  .weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px;background:var(--line);}
-  .weekday{
-    text-align:center;font-size:10px;font-weight:600;letter-spacing:.1em;
-    color:var(--ink-soft);text-transform:uppercase;padding:6px 0;background:var(--bg);
-    font-family:'IBM Plex Mono',monospace;
+  #calendar{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .week-col-label{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+    letter-spacing:.06em;color:var(--ink-soft);text-transform:uppercase;
+    padding-bottom:4px;text-align:center;
   }
-  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);margin-bottom:1px;}
+  .week-col{display:flex;flex-direction:column;gap:1px;background:var(--line);}
 
   .day{
     background:var(--paper);
     display:flex;flex-direction:column;
-    height:210px;cursor:pointer;position:relative;overflow:hidden;
+    height:190px;cursor:pointer;position:relative;overflow:hidden;
     transition:outline .1s ease;
   }
   .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
@@ -79,38 +93,38 @@
   }
   .day.today .date-num{color:var(--today-accent);}
 
-  .half{padding:4px 7px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden;}
+  .half{padding:4px 9px 7px;flex:1;display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden;}
   .am{background:var(--paper);}
   .pm{background:var(--paper);color:var(--ink);}
   .rule{height:1px;background:var(--ink);opacity:.15;position:relative;}
   .rule::before{
-    content:'';position:absolute;left:6px;top:-2px;width:4px;height:4px;
+    content:'';position:absolute;left:8px;top:-2px;width:4px;height:4px;
     border-radius:50%;background:var(--ink);opacity:.5;
   }
 
   .half-label{
-    font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:600;
+    font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
     letter-spacing:.1em;opacity:.5;text-transform:uppercase;
   }
-  .tags{display:flex;flex-wrap:wrap;gap:3px;}
+  .tags{display:flex;flex-wrap:wrap;gap:4px;}
   .tag{
-    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;
-    padding:1px 4px;border:1px solid currentColor;border-radius:2px;
+    font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:700;
+    padding:1px 5px;border:1px solid currentColor;border-radius:2px;
     color:var(--tag-gray);
   }
   .tag.pink{color:var(--tag-pink);}
   .tag.red{color:var(--tag-red);}
   .tag.gray{color:var(--tag-gray);}
 
-  .products{font-size:10.5px;line-height:1.45;color:var(--ink);}
+  .products{font-size:11.5px;line-height:1.45;color:var(--ink);}
   .empty-hint{font-size:10px;color:var(--ink-soft);}
 
   .memo-line{
-    font-size:9.5px;line-height:1.3;opacity:.6;font-weight:400;color:var(--ink);
+    font-size:10.5px;line-height:1.35;opacity:.65;font-weight:400;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .actives-line{
-    font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;
+    font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:700;
     color:var(--tag-purple);opacity:1;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
@@ -151,9 +165,11 @@
 
   @media (max-width:640px){
     .wrap{padding:6px 10px 12px;}
-    .day{height:185px;}
-    .products{font-size:9px;}
-    .tag{font-size:8px;}
+    #calendar{gap:6px;}
+    .day{height:230px;}
+    .products{font-size:10.5px;}
+    .memo-line{font-size:9.5px;}
+    .tag{font-size:9px;}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
 </style>
@@ -161,11 +177,14 @@
 <body>
 <div class="wrap">
   <div class="toolbar">
+    <button class="nav-btn" id="prevBtn">◀</button>
     <div class="range mono" id="rangeLabel">—</div>
+    <button class="nav-btn" id="nextBtn">▶</button>
+  </div>
+  <div class="toolbar2">
+    <div class="status" id="status"></div>
     <button class="refresh-btn" id="refreshBtn">Refresh</button>
   </div>
-  <div class="status" id="status"></div>
-  <div class="weekday-row" id="weekdayRow"></div>
   <div id="calendar"></div>
 </div>
 
@@ -188,30 +207,21 @@ function getMondayOfWeek(d){
   return monday;
 }
 
-function buildRange(){
-  const today = new Date();
-  const thisMonday = getMondayOfWeek(today);
-  const start = new Date(thisMonday); start.setDate(thisMonday.getDate()-7);
-  const end = new Date(thisMonday); end.setDate(thisMonday.getDate()+13);
+function buildWeekDays(monday){
   const days = [];
-  for(let i=0;i<21;i++){
-    const d = new Date(start); d.setDate(start.getDate()+i);
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
     days.push(d);
   }
-  return {start, end, days, today};
+  return days;
 }
 
-let STATE = { data: {}, days: [] };
+let STATE = { data: {}, today: new Date(), pageOffset: 0 };
 
 function setStatus(msg, isError){
   const el = document.getElementById('status');
   el.textContent = msg || '';
   el.className = 'status' + (isError ? ' error' : '');
-}
-
-function renderWeekdayRow(){
-  const row = document.getElementById('weekdayRow');
-  row.innerHTML = WEEKDAYS.slice(1).concat(WEEKDAYS[0]).map(w=>`<div class="weekday">${w}</div>`).join('');
 }
 
 function tagClass(name){
@@ -227,19 +237,26 @@ function renderTags(list){
   return `<div class="tags">${list.map(t=>`<span class="tag ${tagClass(t)}">${t}</span>`).join('')}</div>`;
 }
 
+function weekLabel(weeksBack){
+  if(weeksBack === 0) return '이번주';
+  if(weeksBack === 1) return '지난주';
+  return `${weeksBack}주 전`;
+}
+
 function dayCellHTML(d, entry){
   const iso = toISODate(d);
-  const isToday = iso === toISODate(STATE.days.today);
+  const isToday = iso === toISODate(STATE.today);
   const hasData = !!entry;
   const morning = entry?.morning || {};
   const night = entry?.night || {};
-  const amProducts = (morning.products||[]).slice(0,2).join(' · ');
-  const pmProducts = (night.products||[]).slice(0,2).join(' · ');
+  const amProducts = (morning.products||[]).slice(0,3).join(' · ');
+  const pmProducts = (night.products||[]).slice(0,3).join(' · ');
   const pmActives = (night.actives||[]).concat(night.care||[]);
+  const weekday = WEEKDAYS[d.getDay()];
 
   return `
   <div class="day ${isToday?'today':''} ${hasData?'':'empty'}" data-date="${iso}">
-    <div class="date-num"><span>${d.getDate()}</span></div>
+    <div class="date-num"><span>${weekday} ${d.getMonth()+1}/${d.getDate()}</span></div>
     <div class="half am">
       <div class="half-label">AM</div>
       ${renderTags(morning.skin)}
@@ -258,17 +275,28 @@ function dayCellHTML(d, entry){
 }
 
 function renderCalendar(){
+  const thisMonday = getMondayOfWeek(new Date());
+  const rightMonday = new Date(thisMonday); rightMonday.setDate(thisMonday.getDate() - 7*STATE.pageOffset);
+  const leftMonday = new Date(rightMonday); leftMonday.setDate(rightMonday.getDate() - 7);
+
+  const leftDays = buildWeekDays(leftMonday);
+  const rightDays = buildWeekDays(rightMonday);
+
   const cal = document.getElementById('calendar');
-  const days = STATE.days.days;
-  let html = '';
-  for(let w=0; w<3; w++){
-    const weekDays = days.slice(w*7, w*7+7);
-    html += `<div class="week">${weekDays.map(d=>dayCellHTML(d, STATE.data[toISODate(d)])).join('')}</div>`;
-  }
-  cal.innerHTML = html;
+  cal.innerHTML = `
+    <div>
+      <div class="week-col-label">${weekLabel(STATE.pageOffset+1)}</div>
+      <div class="week-col">${leftDays.map(d=>dayCellHTML(d, STATE.data[toISODate(d)])).join('')}</div>
+    </div>
+    <div>
+      <div class="week-col-label">${weekLabel(STATE.pageOffset)}</div>
+      <div class="week-col">${rightDays.map(d=>dayCellHTML(d, STATE.data[toISODate(d)])).join('')}</div>
+    </div>
+  `;
 
   document.getElementById('rangeLabel').textContent =
-    `${toISODate(days[0])} — ${toISODate(days[20])}`;
+    `${toISODate(leftDays[0])} — ${toISODate(rightDays[6])}`;
+  document.getElementById('nextBtn').disabled = (STATE.pageOffset === 0);
 
   cal.querySelectorAll('.day').forEach(el=>{
     el.addEventListener('click', ()=>{
@@ -334,10 +362,18 @@ async function fetchData(){
 }
 
 function init(){
-  STATE.days = buildRange();
-  renderWeekdayRow();
-  renderCalendar();
   document.getElementById('refreshBtn').addEventListener('click', fetchData);
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    STATE.pageOffset++;
+    renderCalendar();
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(STATE.pageOffset > 0){
+      STATE.pageOffset--;
+      renderCalendar();
+    }
+  });
+  renderCalendar();
   fetchData();
 }
 init();
