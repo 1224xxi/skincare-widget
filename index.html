@@ -49,6 +49,8 @@
   }
   .nav-btn:hover{background:var(--ink);color:var(--bg);}
   .nav-btn:disabled{opacity:.3;cursor:default;background:var(--paper);color:var(--ink);}
+  .today-btn{border-color:var(--today-accent);color:var(--today-accent);font-size:10px;}
+  .today-btn:hover{background:var(--today-accent);color:#fff;}
   .range{font-size:12px;color:var(--ink-soft);min-width:150px;text-align:center;}
   .range .mono{color:var(--ink);}
 
@@ -173,6 +175,7 @@
     <button class="nav-btn" id="prevBtn">◀</button>
     <div class="range mono" id="rangeLabel">—</div>
     <button class="nav-btn" id="nextBtn">▶</button>
+    <button class="nav-btn today-btn" id="todayBtn" title="오늘로 돌아가기">●</button>
   </div>
   <div class="toolbar2">
     <div class="status" id="status"></div>
@@ -370,6 +373,10 @@ function init(){
       STATE.pageOffset--;
       renderCalendar();
     }
+  });
+  document.getElementById('todayBtn').addEventListener('click', ()=>{
+    STATE.pageOffset = 0;
+    renderCalendar();
   });
   renderCalendar();
   fetchData();
