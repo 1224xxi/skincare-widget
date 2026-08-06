@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스킨케어 로그 (모바일)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,700;1,9..40,700&family=Noto+Sans+KR:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFFFFF;
+    --paper: #FFFFFF;
+    --ink: #111111;
+    --ink-soft: #8A8A8A;
+    --line: #E7E7E7;
+
+    --date-bg: #EFEFEF;
+    --today-accent: #D98E97;
+
+    --tag-pink: #C13B5A;
+    --tag-red: #C1451F;
+    --tag-gray: #A67C1E;
+    --tag-purple: #7C5CBF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:'Noto Sans KR','DM Sans',-apple-system,sans-serif;
+    font-weight:700;-webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:6px 10px 12px;}
+
+  .toolbar{
+    display:flex;justify-content:center;align-items:center;
+    gap:10px;padding:0 0 6px;
+  }
+  .nav-btn{
+    border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;
+    width:30px;height:30px;border-radius:3px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .12s ease,color .12s ease;
+  }
+  .nav-btn:hover{background:var(--ink);color:var(--bg);}
+  .nav-btn:disabled{opacity:.3;cursor:default;background:var(--paper);color:var(--ink);}
+  .today-btn{border-color:var(--today-accent);color:var(--today-accent);font-size:10px;}
+  .today-btn:hover{background:var(--today-accent);color:#fff;}
+  .range{font-size:12px;color:var(--ink-soft);min-width:120px;text-align:center;}
+  .range .mono{color:var(--ink);}
+
+  .toolbar2{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 0 8px;flex-wrap:wrap;gap:10px;
+  }
+  .refresh-btn{
+    border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    letter-spacing:.04em;text-transform:uppercase;
+    padding:7px 14px;border-radius:3px;cursor:pointer;
+    transition:background .12s ease,color .12s ease;
+  }
+  .refresh-btn:hover{background:var(--ink);color:var(--bg);}
+  .refresh-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink);}
+  .status{font-size:11px;color:var(--ink-soft);margin:0;min-height:14px;font-family:'IBM Plex Mono',monospace;}
+  .status.error{color:var(--tag-red);}
+
+  #calendar{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .week-col{display:flex;flex-direction:column;gap:1px;background:var(--line);}
+
+  .day{
+    background:var(--paper);
+    display:flex;flex-direction:column;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:outline .1s ease;
+  }
+  .day:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:2;}
+  .day.today{outline:3px solid var(--today-accent);outline-offset:-3px;z-index:3;}
+  .day.empty .half{opacity:.42;}
+
+  .date-num{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+    padding:5px 7px 3px;color:var(--ink-soft);background:var(--date-bg);
+    display:flex;justify-content:space-between;
+  }
+  .day.today .date-num{color:var(--today-accent);}
+
+  .half{padding:6px 9px;line-height:1.7;overflow:hidden;}
+  .rule{height:1px;background:var(--ink);opacity:.15;position:relative;}
+  .rule::before{
+    content:'';position:absolute;left:8px;top:-2px;width:4px;height:4px;
+    border-radius:50%;background:var(--ink);opacity:.5;
+  }
+
+  .tag{
+    font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:700;
+    padding:1px 5px;border:1px solid currentColor;border-radius:2px;
+    color:var(--tag-gray);white-space:nowrap;
+    display:inline-block;vertical-align:middle;margin:0 4px 2px 0;
+  }
+  .tag.pink{color:var(--tag-pink);}
+  .tag.red{color:var(--tag-red);}
+  .tag.gray{color:var(--tag-gray);}
+
+  .products-inline{font-size:11.5px;color:var(--ink);margin-right:6px;}
+  .empty-hint{font-size:10px;color:var(--ink-soft);}
+  .memo-inline{font-size:10.5px;opacity:.65;font-weight:400;color:var(--ink);}
+  .actives-inline{
+    font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:700;
+    color:var(--tag-purple);
+  }
+
+  /* modal */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,17,12,.5);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:50;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--paper);border-radius:4px;max-width:420px;width:100%;
+    max-height:82vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);
+    border:1px solid var(--line);
+  }
+  .modal-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px;border-bottom:2px solid var(--ink);
+  }
+  .modal-date{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:19px;}
+  .modal-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);}
+  .close-x{background:none;border:none;font-size:16px;cursor:pointer;color:var(--ink-soft);}
+  .modal-section{padding:16px 20px;border-bottom:1px solid var(--line);}
+  .modal-section:last-child{border-bottom:none;}
+  .modal-section-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-bottom:10px;
+  }
+  .modal-row{font-size:13px;margin-bottom:8px;line-height:1.5;}
+  .modal-row b{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;opacity:.55;
+    font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+    display:block;margin-bottom:3px;
+  }
+  .modal-row.accent-skin{color:var(--tag-pink);font-weight:700;}
+  .modal-row.accent-active{color:var(--tag-purple);font-weight:700;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="nav-btn" id="prevBtn">◀</button>
+    <div class="range mono" id="rangeLabel">—</div>
+    <button class="nav-btn" id="nextBtn">▶</button>
+    <button class="nav-btn today-btn" id="todayBtn" title="오늘로 돌아가기">●</button>
+  </div>
+  <div class="toolbar2">
+    <div class="status" id="status"></div>
+    <button class="refresh-btn" id="refreshBtn">Refresh</button>
+  </div>
+  <div id="calendar"></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const WEEKDAYS = ["일","월","화","수","목","금","토"];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function toISODate(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+
+function getMondayOfWeek(d){
+  const day = d.getDay();
+  const diff = (day===0? -6 : 1) - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate()+diff);
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+
+function buildWeekDays(monday){
+  const days = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    days.push(d);
+  }
+  return days;
+}
+
+let STATE = { data: {}, today: new Date(), pageOffset: 0 };
+
+function setStatus(msg, isError){
+  const el = document.getElementById('status');
+  el.textContent = msg || '';
+  el.className = 'status' + (isError ? ' error' : '');
+}
+
+function tagClass(name){
+  if(name.includes('코') || name.includes('모공')) return 'pink';
+  if(name.includes('볼') || name.includes('흔적')) return 'red';
+  if(name.includes('이마')) return 'gray';
+  if(['레티놀','비타민C','AHA/BHA','기타 액티브'].includes(name)) return 'purple';
+  return '';
+}
+
+function renderTags(list){
+  if(!list || !list.length) return '';
+  return list.map(t=>`<span class="tag ${tagClass(t)}">${t}</span>`).join('');
+}
+
+function halfLine(section, isNight){
+  const parts = [];
+  const tagsHTML = renderTags(section.skin);
+  if(tagsHTML) parts.push(tagsHTML);
+  const products = (section.products||[]).slice(0,3).join(' · ');
+  if(products) parts.push(`<span class="products-inline">${products}</span>`);
+  if(isNight){
+    const act = (section.actives||[]).concat(section.care||[]);
+    if(act.length) parts.push(`<span class="actives-inline">${act.join(' · ')}</span>`);
+  }
+  if(section.memo) parts.push(`<span class="memo-inline">— ${section.memo}</span>`);
+  if(!parts.length) return `<span class="empty-hint">·</span>`;
+  return parts.join(' ');
+}
+
+function weekLabel(weeksBack){
+  if(weeksBack === 0) return '이번주';
+  if(weeksBack === 1) return '지난주';
+  return `${weeksBack}주 전`;
+}
+
+function dayCellHTML(d, entry){
+  const iso = toISODate(d);
+  const isToday = iso === toISODate(STATE.today);
+  const hasData = !!entry;
+  const morning = entry?.morning || {};
+  const night = entry?.night || {};
+  const weekday = WEEKDAYS[d.getDay()];
+
+  return `
+  <div class="day ${isToday?'today':''} ${hasData?'':'empty'}" data-date="${iso}">
+    <div class="date-num"><span>${weekday} ${d.getMonth()+1}/${d.getDate()}</span></div>
+    <div class="half am">${halfLine(morning, false)}</div>
+    <div class="rule"></div>
+    <div class="half pm">${halfLine(night, true)}</div>
+  </div>`;
+}
+
+function renderCalendar(){
+  const thisMonday = getMondayOfWeek(new Date());
+  const monday = new Date(thisMonday); monday.setDate(thisMonday.getDate() - 7*STATE.pageOffset);
+  const days = buildWeekDays(monday);
+
+  // 2열 x 4행: 왼쪽 컬럼 월~목, 오른쪽 컬럼 금~일
+  const leftDays = days.slice(0, 4);
+  const rightDays = days.slice(4, 7);
+
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = `
+    <div class="week-col">${leftDays.map(d=>dayCellHTML(d, STATE.data[toISODate(d)])).join('')}</div>
+    <div class="week-col">${rightDays.map(d=>dayCellHTML(d, STATE.data[toISODate(d)])).join('')}</div>
+  `;
+
+  document.getElementById('rangeLabel').innerHTML =
+    `${weekLabel(STATE.pageOffset)} <span class="mono">${toISODate(days[0])}—${toISODate(days[6])}</span>`;
+  document.getElementById('nextBtn').disabled = (STATE.pageOffset === 0);
+
+  cal.querySelectorAll('.day').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const iso = el.getAttribute('data-date');
+      openModal(iso, STATE.data[iso]);
+    });
+  });
+}
+
+function openModal(iso, entry){
+  const modal = document.getElementById('modal');
+  const morning = entry?.morning || {};
+  const night = entry?.night || {};
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-date">${iso}</div>
+        <div class="modal-tag">${entry ? 'RECORDED' : 'NO RECORD'}</div>
+      </div>
+      <button class="close-x" id="closeX">✕</button>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Morning</div>
+      <div class="modal-row accent-skin"><b>피부 상태</b>${(morning.skin||[]).join(', ') || '—'}</div>
+      <div class="modal-row"><b>사용 제품</b>${(morning.products||[]).join(', ') || '—'}</div>
+      <div class="modal-row"><b>메모</b>${morning.memo || '—'}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Night</div>
+      <div class="modal-row accent-skin"><b>피부 상태</b>${(night.skin||[]).join(', ') || '—'}</div>
+      <div class="modal-row"><b>사용 제품</b>${(night.products||[]).join(', ') || '—'}</div>
+      <div class="modal-row accent-active"><b>액티브 / 관리</b>${(night.actives||[]).concat(night.care||[]).join(', ') || '—'}</div>
+      <div class="modal-row"><b>메모</b>${night.memo || '—'}</div>
+    </div>
+  `;
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.getElementById('closeX').addEventListener('click', closeModal);
+}
+function closeModal(){ document.getElementById('modalBackdrop').classList.remove('open'); }
+document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
+  if(e.target.id==='modalBackdrop') closeModal();
+});
+
+async function fetchData(){
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  setStatus('불러오는 중…');
+  try{
+    const r = await fetch('https://skincare-widget-chi.vercel.app/api/skincare');
+    const json = await r.json();
+    if(!r.ok) throw new Error(json.error || ('HTTP ' + r.status));
+    const map = {};
+    (json.data||[]).forEach(e => { if(e && e.date) map[e.date] = e; });
+    STATE.data = map;
+    renderCalendar();
+    setStatus(`SYNCED ${new Date().toLocaleTimeString('ko-KR')}`);
+  }catch(err){
+    console.error(err);
+    setStatus('불러오기 실패: ' + (err.message||''), true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function init(){
+  document.getElementById('refreshBtn').addEventListener('click', fetchData);
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    STATE.pageOffset++;
+    renderCalendar();
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(STATE.pageOffset > 0){
+      STATE.pageOffset--;
+      renderCalendar();
+    }
+  });
+  document.getElementById('todayBtn').addEventListener('click', ()=>{
+    STATE.pageOffset = 0;
+    renderCalendar();
+  });
+  renderCalendar();
+  fetchData();
+}
+init();
+</script>
+</body>
+</html>
